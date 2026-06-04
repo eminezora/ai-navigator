@@ -1,0 +1,15 @@
+import React from 'react'
+import ReactDOM from 'react-dom/client'
+import axios from 'axios'
+import App from './App.jsx'
+import './index.css'
+
+// Set Axios default baseURL if VITE_API_URL environment variable is provided,
+// otherwise relative paths will use Vercel's rewrite proxy out of the box.
+axios.defaults.baseURL = import.meta.env.VITE_API_URL || ''
+
+ReactDOM.createRoot(document.getElementById('root')).render(
+  <React.StrictMode>
+    <App />
+  </React.StrictMode>,
+)

@@ -1,0 +1,25 @@
+services:
+  - type: web
+    name: ai-navigator-backend
+    env: node
+    plan: free
+    buildCommand: "npm install && npx prisma generate"
+    startCommand: "npx prisma migrate deploy && node prisma/seed.js && node src/index.js"
+    rootDirectory: backend
+    envVars:
+      - key: PORT
+        value: 5050
+      - key: DATABASE_URL
+        fromDatabase:
+          name: ai-navigator-db
+          property: connectionString
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: JWT_SECRET
+        generateValue: true
+
+databases:
+  - name: ai-navigator-db
+    plan: free
+    databaseName: ainavigatordb
+    user: ainavigatoruser

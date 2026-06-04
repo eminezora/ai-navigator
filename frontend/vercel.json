@@ -1,0 +1,8 @@
+{
+  "rewrites": [
+    {
+      "source": "/api/:path*",
+      "destination": "https://ai-navigator-backend.onrender.com/api/:path*"
+    }
+  ]
+}
