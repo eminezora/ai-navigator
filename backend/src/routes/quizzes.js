@@ -214,8 +214,8 @@ router.put('/:id', authenticateToken, requireRole('admin'), async (req, res) => 
     const { id } = req.params;
     const { title, description, isActive, questions } = req.body;
 
-    if (!title || !questions || !Array.isArray(questions) || questions.length === 0) {
-      return res.status(400).json({ error: 'Başlık ve sorular zorunludur.' });
+    if (!title) {
+      return res.status(400).json({ error: 'Başlık zorunludur.' });
     }
 
     const quiz = await prisma.quiz.findUnique({ where: { id } });
@@ -234,28 +234,30 @@ router.put('/:id', authenticateToken, requireRole('admin'), async (req, res) => 
         }
       });
 
-      // Clear existing questions
-      await tx.question.deleteMany({
-        where: { quizId: id }
-      });
+      if (questions && Array.isArray(questions)) {
+        // Clear existing questions
+        await tx.question.deleteMany({
+          where: { quizId: id }
+        });
 
-      // Create new ones
-      const questionData = questions.map(q => ({
-        quizId: id,
-        questionText: q.questionText,
-        optionA: q.optionA,
-        optionB: q.optionB,
-        optionC: q.optionC,
-        optionD: q.optionD,
-        correctOption: q.correctOption,
-        explanation: q.explanation || '',
-        category: q.category || 'Yapay Zekâ',
-        difficulty: q.difficulty || 'orta'
-      }));
+        // Create new ones
+        const questionData = questions.map(q => ({
+          quizId: id,
+          questionText: q.questionText,
+          optionA: q.optionA,
+          optionB: q.optionB,
+          optionC: q.optionC,
+          optionD: q.optionD,
+          correctOption: q.correctOption,
+          explanation: q.explanation || '',
+          category: q.category || 'Yapay Zekâ',
+          difficulty: q.difficulty || 'orta'
+        }));
 
-      await tx.question.createMany({
-        data: questionData
-      });
+        await tx.question.createMany({
+          data: questionData
+        });
+      }
     });
 
     res.json({ message: 'Quiz başarıyla güncellendi.' });
