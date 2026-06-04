@@ -1,12 +1,18 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import axios from 'axios';
 
+// Configure Axios Defaults synchronously at startup to prevent initial request race conditions
+const initialToken = localStorage.getItem('token');
+if (initialToken) {
+  axios.defaults.headers.common['Authorization'] = `Bearer ${initialToken}`;
+}
+
 const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [token, setToken] = useState(localStorage.getItem('token'));
+  const [token, setToken] = useState(initialToken);
 
   // Configure Axios Defaults and Interceptors
   useEffect(() => {
@@ -48,6 +54,8 @@ export const AuthProvider = ({ children }) => {
   const register = async (userData) => {
     try {
       const response = await axios.post('/api/auth/register', userData);
+      axios.defaults.headers.common['Authorization'] = `Bearer ${response.data.token}`;
+      localStorage.setItem('token', response.data.token);
       setToken(response.data.token);
       setUser(response.data.user);
       return response.data;
@@ -60,6 +68,8 @@ export const AuthProvider = ({ children }) => {
   const login = async (email, password) => {
     try {
       const response = await axios.post('/api/auth/login', { email, password });
+      axios.defaults.headers.common['Authorization'] = `Bearer ${response.data.token}`;
+      localStorage.setItem('token', response.data.token);
       setToken(response.data.token);
       setUser(response.data.user);
       return response.data;
