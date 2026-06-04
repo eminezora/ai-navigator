@@ -4,7 +4,7 @@ services:
     env: node
     plan: free
     buildCommand: "npm install && npx prisma generate"
-    startCommand: "npx prisma migrate deploy && node prisma/seed.js && node src/index.js"
+    startCommand: "npx prisma db push && node prisma/seed.js && node src/index.js"
     rootDirectory: backend
     envVars:
       - key: PORT
