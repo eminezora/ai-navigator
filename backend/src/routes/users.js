@@ -195,7 +195,7 @@ router.get('/student-stats', authenticateToken, async (req, res) => {
     // Format chart data: last 10 attempts
     const chartData = results.slice(0, 10).reverse().map(r => ({
       date: new Date(r.createdAt).toLocaleDateString('tr-TR', { day: 'numeric', month: 'short' }),
-      quizTitle: r.quiz.title.length > 15 ? r.quiz.title.substring(0, 15) + '...' : r.quiz.title,
+      quizTitle: r.quiz ? (r.quiz.title.length > 15 ? r.quiz.title.substring(0, 15) + '...' : r.quiz.title) : 'Silinmiş Quiz',
       score: r.score,
       percentage: r.percentage
     }));
@@ -207,7 +207,7 @@ router.get('/student-stats', authenticateToken, async (req, res) => {
       badges,
       resultsHistory: results.map(r => ({
         id: r.id,
-        quizTitle: r.quiz.title,
+        quizTitle: r.quiz ? r.quiz.title : 'Silinmiş Quiz',
         score: r.score,
         percentage: r.percentage,
         badge: r.badge,
@@ -243,7 +243,7 @@ router.get('/admin-stats', authenticateToken, requireRole('admin'), async (req, 
     // 1. Classroom averages
     const classGroups = {};
     allResults.forEach(r => {
-      const cls = r.user.className || 'Belirtilmemiş';
+      const cls = (r.user && r.user.className) || 'Belirtilmemiş';
       if (!classGroups[cls]) {
         classGroups[cls] = { total: 0, count: 0 };
       }
@@ -266,6 +266,7 @@ router.get('/admin-stats', authenticateToken, requireRole('admin'), async (req, 
 
     const categoryGroups = {};
     answersWithQuestion.forEach(a => {
+      if (!a.question) return;
       const cat = a.question.category || 'Genel';
       if (!categoryGroups[cat]) {
         categoryGroups[cat] = { correct: 0, total: 0 };
@@ -297,6 +298,7 @@ router.get('/admin-stats', authenticateToken, requireRole('admin'), async (req, 
 
     const questionCounts = {};
     wrongAnswers.forEach(w => {
+      if (!w.question || !w.question.quiz) return;
       const qid = w.questionId;
       if (!questionCounts[qid]) {
         questionCounts[qid] = {
@@ -315,6 +317,7 @@ router.get('/admin-stats', authenticateToken, requireRole('admin'), async (req, 
     // 4. Student success board (average score per student)
     const studentGroups = {};
     allResults.forEach(r => {
+      if (!r.user) return;
       const sId = r.userId;
       if (!studentGroups[sId]) {
         studentGroups[sId] = { name: r.user.name, className: r.user.className, total: 0, count: 0 };
@@ -332,6 +335,7 @@ router.get('/admin-stats', authenticateToken, requireRole('admin'), async (req, 
 
     // 5. Recent Solved Quizzes
     const recentSolves = allResults
+      .filter(r => r.user && r.quiz)
       .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
       .slice(0, 5)
       .map(r => ({

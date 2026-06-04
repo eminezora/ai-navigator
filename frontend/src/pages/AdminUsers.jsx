@@ -323,7 +323,7 @@ export default function AdminUsers() {
                     <div key={res.id} className="p-4 bg-white/5 border border-white/5 rounded-xl space-y-3">
                       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-white/5 pb-2.5">
                         <div>
-                          <h5 className="font-bold text-slate-100 text-sm">{res.quiz.title}</h5>
+                          <h5 className="font-bold text-slate-100 text-sm">{res.quiz ? res.quiz.title : 'Silinmiş Quiz'}</h5>
                           <span className="text-[10px] text-slate-400 inline-flex items-center gap-1 mt-0.5">
                             <Calendar size={10} />
                             {new Date(res.createdAt).toLocaleDateString('tr-TR')}
