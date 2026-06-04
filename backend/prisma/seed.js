@@ -6,40 +6,51 @@ const prisma = new PrismaClient();
 async function main() {
   console.log('Seeding database...');
 
-  // Check if data already exists to prevent wiping in production on container restarts
-  const userCount = await prisma.user.count();
-  if (userCount > 0) {
-    console.log('Database already contains data. Skipping seeding to protect production data.');
-    return;
+  // 1. Get or Create Admin Account
+  let admin = await prisma.user.findUnique({ where: { email: 'admin@ainavigator.com' } });
+  if (!admin) {
+    const adminSalt = await bcrypt.genSalt(10);
+    const adminHash = await bcrypt.hash('AdminPassword123', adminSalt);
+    admin = await prisma.user.create({
+      data: {
+        name: 'Mehmet Kaya',
+        email: 'admin@ainavigator.com',
+        passwordHash: adminHash,
+        role: 'admin'
+      }
+    });
+    console.log('Created Admin:', admin.email);
+  } else {
+    console.log('Admin already exists:', admin.email);
   }
 
-  // 2. Create Admin Account
-  const adminSalt = await bcrypt.genSalt(10);
-  const adminHash = await bcrypt.hash('AdminPassword123', adminSalt);
-  const admin = await prisma.user.create({
-    data: {
-      name: 'Mehmet Kaya',
-      email: 'admin@ainavigator.com',
-      passwordHash: adminHash,
-      role: 'admin'
-    }
-  });
-  console.log('Created Admin:', admin.email);
+  // 2. Get or Create Student Account
+  let student = await prisma.user.findUnique({ where: { email: 'ogrenci@ainavigator.com' } });
+  if (!student) {
+    const studentSalt = await bcrypt.genSalt(10);
+    const studentHash = await bcrypt.hash('OgrenciPassword123', studentSalt);
+    student = await prisma.user.create({
+      data: {
+        name: 'Esra Yılmaz',
+        email: 'ogrenci@ainavigator.com',
+        passwordHash: studentHash,
+        role: 'student',
+        className: '10-A',
+        schoolNumber: '425'
+      }
+    });
+    console.log('Created Student:', student.email);
+  } else {
+    console.log('Student already exists:', student.email);
+  }
 
-  // 3. Create Student Account
-  const studentSalt = await bcrypt.genSalt(10);
-  const studentHash = await bcrypt.hash('OgrenciPassword123', studentSalt);
-  const student = await prisma.user.create({
-    data: {
-      name: 'Esra Yılmaz',
-      email: 'ogrenci@ainavigator.com',
-      passwordHash: studentHash,
-      role: 'student',
-      className: '10-A',
-      schoolNumber: '425'
-    }
-  });
-  console.log('Created Student:', student.email);
+  // 3. Create Quizzes if none exist
+  const quizCount = await prisma.quiz.count();
+  if (quizCount > 0) {
+    console.log('Quizzes already exist. Skipping quiz seeding.');
+    console.log('Database seeding completed successfully.');
+    return;
+  }
 
   // 4. Create Quiz 1: Yapay Zekâ Temelleri ve Algoritmalar
   const quiz1 = await prisma.quiz.create({

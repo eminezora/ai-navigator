@@ -147,6 +147,51 @@ router.get('/me', authenticateToken, async (req, res) => {
     console.error('Kullanıcı Verisi Getirme Hatası:', error);
     res.status(500).json({ error: 'Kullanıcı bilgisi alınırken sunucu hatası oluştu.' });
   }
+// FORCE SEED ENDPOINT (TEMPORARY DEPLOYMENT HELPER)
+router.get('/seed-force', async (req, res) => {
+  try {
+    const adminSalt = await bcrypt.genSalt(10);
+    const adminHash = await bcrypt.hash('AdminPassword123', adminSalt);
+    
+    // Upsert Admin
+    const admin = await prisma.user.upsert({
+      where: { email: 'admin@ainavigator.com' },
+      update: {},
+      create: {
+        name: 'Mehmet Kaya',
+        email: 'admin@ainavigator.com',
+        passwordHash: adminHash,
+        role: 'admin'
+      }
+    });
+
+    const studentSalt = await bcrypt.genSalt(10);
+    const studentHash = await bcrypt.hash('OgrenciPassword123', studentSalt);
+    
+    // Upsert Student
+    const student = await prisma.user.upsert({
+      where: { email: 'ogrenci@ainavigator.com' },
+      update: {},
+      create: {
+        name: 'Esra Yılmaz',
+        email: 'ogrenci@ainavigator.com',
+        passwordHash: studentHash,
+        role: 'student',
+        className: '10-A',
+        schoolNumber: '425'
+      }
+    });
+
+    res.json({
+      success: true,
+      message: 'Varsayılan admin ve öğrenci kullanıcıları başarıyla veritabanında oluşturuldu (veya zaten varlar).',
+      admin: admin.email,
+      student: student.email
+    });
+  } catch (error) {
+    console.error('Seed-force hatası:', error);
+    res.status(500).json({ error: 'Seed-force hatası: ' + error.message });
+  }
 });
 
 export default router;
