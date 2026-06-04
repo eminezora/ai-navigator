@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Search, UserPlus, Trash2, Eye, X, AlertCircle, Calendar, MessageSquare, Compass, ShieldAlert, Award } from 'lucide-react';
+import { Search, UserPlus, Trash2, Eye, X, AlertCircle, Calendar, MessageSquare, Compass, ShieldAlert, Award, Users } from 'lucide-react';
 
 export default function AdminUsers() {
   const [students, setStudents] = useState([]);

@@ -2,12 +2,14 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { ClipboardCheck, Sparkles, Plus, Trash2, Copy, ToggleLeft, ToggleRight, Edit, X, Save, AlertCircle, Eye, ArrowLeft, Brain, HelpCircle } from 'lucide-react';
 
-export default function AdminQuizzes() {
+export default function AdminQuizzes({ view: propView, setView: propSetView }) {
   const [quizzes, setQuizzes] = useState([]);
   const [loading, setLoading] = useState(true);
   
   // Wizards State: 'list' | 'create-manual' | 'edit-manual' | 'create-ai'
-  const [view, setView] = useState('list');
+  const [internalView, setInternalView] = useState('list');
+  const view = propView || internalView;
+  const setView = propSetView || setInternalView;
   const [editingQuizId, setEditingQuizId] = useState(null);
 
   // Manual Form State
