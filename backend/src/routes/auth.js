@@ -147,6 +147,8 @@ router.get('/me', authenticateToken, async (req, res) => {
     console.error('Kullanıcı Verisi Getirme Hatası:', error);
     res.status(500).json({ error: 'Kullanıcı bilgisi alınırken sunucu hatası oluştu.' });
   }
+});
+
 // FORCE SEED ENDPOINT (TEMPORARY DEPLOYMENT HELPER)
 router.get('/seed-force', async (req, res) => {
   try {
